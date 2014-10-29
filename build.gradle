@@ -1,5 +1,8 @@
 
 apply plugin: 'java'
+apply plugin:'application'
+
+mainClassName = "org.demo.core.ProxyNioMain"
 
 repositories {
     mavenCentral()
