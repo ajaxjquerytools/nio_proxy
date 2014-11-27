@@ -1,5 +1,10 @@
-/**
- * Created by vx00418 on 11/27/2014.
- */
+import org.junit.Test;
+
+
 public class PropertiesReaderTest {
+
+    @Test
+    public void shouldReadProperties() throws Exception {
+
+    }
 }
