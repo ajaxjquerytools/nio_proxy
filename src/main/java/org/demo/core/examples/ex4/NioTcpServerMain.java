@@ -1,4 +1,4 @@
-package org.demo.core;
+package org.demo.core.examples.ex4;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -14,8 +14,8 @@ import java.util.logging.Logger;
 /**
  * Created by volodymyrd on 29.10.14.
  */
-public class ProxyNioMain {
-    private final static Logger logger = Logger.getLogger(ProxyNioMain.class.getName());
+public class NioTcpServerMain {
+    private final static Logger logger = Logger.getLogger(NioTcpServerMain.class.getName());
 
 
     private Map<SocketChannel, List<byte[]>> keepDataTrack = new HashMap<>();
@@ -26,19 +26,14 @@ public class ProxyNioMain {
         final int DEFAULT_PORT = 5555;
 
         //open Selector and ServerSocketChannel by calling the open() method
-        try (Selector selector = Selector.open();
-             ServerSocketChannel serverSocketChannel = ServerSocketChannel.open()) {
-
+        try (Selector selector = Selector.open(); ServerSocketChannel serverSocketChannel = ServerSocketChannel.open()) {
             //check that both of them were successfully opened
             if ((serverSocketChannel.isOpen()) && (selector.isOpen())) {
-
                 //configure non-blocking mode
                 serverSocketChannel.configureBlocking(false);
-
                 //set some options
                 serverSocketChannel.setOption(StandardSocketOptions.SO_RCVBUF, 256 * 1024);
                 serverSocketChannel.setOption(StandardSocketOptions.SO_REUSEADDR, true);
-
                 //bind the server socket channel to port
                 serverSocketChannel.bind(new InetSocketAddress(DEFAULT_PORT));
 
@@ -51,13 +46,10 @@ public class ProxyNioMain {
                 while (true) {
                     //wait for incomming events
                     selector.select();
-
                     //there is something to process on selected keys
                     Iterator keys = selector.selectedKeys().iterator();
-
                     while (keys.hasNext()) {
                         SelectionKey key = (SelectionKey) keys.next();
-
                         //prevent the same key from coming up again
                         keys.remove();
 
@@ -91,12 +83,26 @@ public class ProxyNioMain {
 
         System.out.println("Incoming connection from: " + socketChannel.getRemoteAddress());
 
+//        String resp = "HTTP/1.1 200 OK\n" +
+//                "Content-Type: text/xml; charset=utf-8\n" +
+//                "Content-Length: length\n" +
+//                "\n" +
+//                "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
+//                "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n" +
+//                "  <soap:Body>\n" +
+//                "  Hello word from server!\n" +
+//                "  </soap:Body>\n" +
+//                "</soap:Envelope>";
+        String resp= "Hello message from server\n";
+
+
         //write a welcome message
-        socketChannel.write(ByteBuffer.wrap("Hello!\n".getBytes("UTF-8")));
+        socketChannel.write(ByteBuffer.wrap(resp.getBytes("UTF-8")));
 
         //register channel with selector for further I/O
         keepDataTrack.put(socketChannel, new ArrayList<byte[]>());
         socketChannel.register(selector, SelectionKey.OP_READ);
+       // socketChannel.close();
     }
 
     //isReadable returned true
@@ -124,8 +130,7 @@ public class ProxyNioMain {
 
             byte[] data = new byte[numRead];
             System.arraycopy(buffer.array(), 0, data, 0, numRead);
-            System.out.println(new String(data, "UTF-8") + " from " +
-                    socketChannel.getRemoteAddress());
+            System.out.println(new String(data, "UTF-8") + " from " +  socketChannel.getRemoteAddress());
 
             // write back to client
             doEchoJob(key, data);
@@ -163,7 +168,7 @@ public class ProxyNioMain {
     public static void main(String[] args) throws IOException {
         logger.info("Starting proxy server....");
 
-        ProxyNioMain main = new ProxyNioMain();
+        NioTcpServerMain main = new NioTcpServerMain();
         main.startEchoServer();
 
         logger.info("Proxy server started....");

@@ -1,4 +1,4 @@
-import org.demo.core.ProxyNioMain;
+import org.demo.core.examples.ex4.NioTcpServerMain;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -22,7 +22,7 @@ public class ProxyIntegrationTest {
         String expectedWebPage = getPageByUrl(expectedUrl);
 
         //2. start proxy server with proper configuration
-        new ProxyNioMain().main(new String[]{});
+        new NioTcpServerMain().main(new String[]{});
 
         //3. send Http request to localhost:port
         String actualWebPage = getPageByUrl(actualUrl);
